@@ -21,7 +21,7 @@ var _ Connector = (*DigitalOceanDNSConnector)(nil)
 
 // SetupCommand is used to setup the command line details
 func (do *DigitalOceanDNSConnector) SetupCommand(app *kingpin.CmdClause) {
-
+	app.Arg("ree", "ROO").String()
 }
 
 // AddNode creates a new record for that node on the DO DNS API
