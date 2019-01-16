@@ -11,7 +11,7 @@ type Connector interface {
 	AddNode(address string, ip net.IP, ttl int) error
 	UpdateNode(address string, ip net.IP, ttl int) error
 	DeleteNode(address string) error
-	SetupCommand(app *kingpin.CmdClause)
+	Setup(*kingpin.CmdClause)
 }
 
 var connectors map[string]Connector
@@ -23,7 +23,6 @@ func RegisterConnector(name string, c Connector) {
 	}
 
 	connectors[name] = c
-
 }
 
 // GetConnector returns the connector assosiated with the name, nil if not found
