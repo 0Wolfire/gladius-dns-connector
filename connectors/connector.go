@@ -2,6 +2,8 @@ package connectors
 
 import (
 	"net"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // Connector is an interface for exposing methods to interact with a DNS service
@@ -9,7 +11,7 @@ type Connector interface {
 	AddNode(address string, ip net.IP, ttl int) error
 	UpdateNode(address string, ip net.IP, ttl int) error
 	DeleteNode(address string) error
-	Connect(args []string) error
+	SetupCommand(app *kingpin.CmdClause)
 }
 
 var connectors map[string]Connector
@@ -21,6 +23,7 @@ func RegisterConnector(name string, c Connector) {
 	}
 
 	connectors[name] = c
+
 }
 
 // GetConnector returns the connector assosiated with the name, nil if not found

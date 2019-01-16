@@ -2,6 +2,8 @@ package connectors
 
 import (
 	"net"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // DigitalOceanDNSConnector implements the connector interface and provides methods
@@ -17,9 +19,9 @@ func init() {
 // Assert that we meet the interface at compile time
 var _ Connector = (*DigitalOceanDNSConnector)(nil)
 
-// Connect parses flags and tries to connect to the DigitalOcean api
-func (do *DigitalOceanDNSConnector) Connect(args []string) error {
-	return nil
+// SetupCommand is used to setup the command line details
+func (do *DigitalOceanDNSConnector) SetupCommand(app *kingpin.CmdClause) {
+
 }
 
 // AddNode creates a new record for that node on the DO DNS API
