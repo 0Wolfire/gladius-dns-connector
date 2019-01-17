@@ -21,7 +21,7 @@ var _ Connector = (*DigitalOceanDNSConnector)(nil)
 
 // Setup is used to setup the command line details and connect to the parser
 func (do *DigitalOceanDNSConnector) Setup(app *kingpin.CmdClause) {
-	app.Arg("", "ROO").String()
+	app.Flag("api_key", "The DigitalOcean API Key [Env: DO_API_KEY]").Envar("DO_API_KEY").String()
 }
 
 // AddNode creates a new record for that node on the DO DNS API
