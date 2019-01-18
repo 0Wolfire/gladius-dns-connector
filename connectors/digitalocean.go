@@ -2,10 +2,11 @@ package connectors
 
 import (
 	"errors"
-	"fmt"
 	"net"
 
 	"context"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
@@ -88,7 +89,7 @@ func (do *DigitalOceanDNSConnector) Connect() error {
 		do.idMap[r.Name] = r.ID
 	}
 
-	fmt.Println(do.idMap)
+	log.Debug().Interface("records_map", do.idMap).Msg("Loaded record IDs")
 
 	return nil
 }
