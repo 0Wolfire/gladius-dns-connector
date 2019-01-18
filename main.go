@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"github.com/gladiusio/gladius-dns-connector/connectors"
 	"github.com/gladiusio/gladius-dns-connector/state"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -12,6 +15,7 @@ import (
 var (
 	app         = kingpin.New("gladns", "An application to map Gladius state to a DNS service")
 	ls          = app.Command("list", "List available connectors").Action(printConnectors)
+	logPretty   = app.Flag("log_pretty", "Whether or not to use pretty output or JSON").Default("true").Bool()
 	gatewayIP   = app.Flag("gateway_ip", "The IP to connect to for the gladius network gateway").Default("127.0.0.1").IP()
 	gatewayPort = app.Flag("gateway_port", "The port to connect to for the gladius network gateway").Default("3001").Uint16()
 )
@@ -34,9 +38,19 @@ func main() {
 		connectors.GetConnector(name).Setup(command)
 	}
 
-	// Tell our parser to use the selected connector
 	chosen := kingpin.MustParse(app.Parse(os.Args[1:]))
+
+	// Configure the logger
+	if *logPretty {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+	//
 	if chosen != "list" {
+		err := connectors.GetConnector(chosen).Connect()
+		if err != nil {
+			log.Fatal().Err(err).Str("name", chosen).Msg("Error conecting to DNS connector")
+		}
 		p.SetConnector(connectors.GetConnector(chosen))
 	}
+
 }

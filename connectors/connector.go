@@ -12,6 +12,7 @@ type Connector interface {
 	UpdateNode(address string, ip net.IP, ttl int) error
 	DeleteNode(address string) error
 	Setup(*kingpin.CmdClause)
+	Connect() error
 }
 
 var connectors map[string]Connector
