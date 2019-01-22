@@ -13,11 +13,10 @@ import (
 )
 
 var (
-	app         = kingpin.New("gladns", "An application to map Gladius state to a DNS service")
-	ls          = app.Command("list", "List available connectors").Action(printConnectors)
-	logPretty   = app.Flag("log_pretty", "Whether or not to use pretty output or JSON").Default("false").Bool()
-	gatewayIP   = app.Flag("gateway_ip", "The IP to connect to for the gladius network gateway").Default("127.0.0.1").IP()
-	gatewayPort = app.Flag("gateway_port", "The port to connect to for the gladius network gateway").Default("3001").Uint16()
+	app            = kingpin.New("gladns", "An application to map Gladius state to a DNS service")
+	ls             = app.Command("list", "List available connectors").Action(printConnectors)
+	logPretty      = app.Flag("log_pretty", "Whether or not to use pretty output or JSON").Default("false").Bool()
+	gatewayAddress = app.Flag("gateway_address", "The base address to connect to for the gladius network gateway").Default("http://localhost:3001").URL()
 )
 
 func printConnectors(c *kingpin.ParseContext) error {
@@ -30,8 +29,6 @@ func printConnectors(c *kingpin.ParseContext) error {
 }
 
 func main() {
-	p := state.NewParser(gatewayIP.String(), *gatewayPort)
-
 	// Regiser connector commands
 	for _, name := range connectors.List() {
 		command := app.Command(name, "Confgiure DNS with the "+name+" connector")
@@ -45,6 +42,8 @@ func main() {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
+	var p *state.Parser
+
 	// Get the chosen connector and start it
 	if connectors.Exists(chosen) {
 		c := connectors.GetConnector(chosen)
@@ -53,7 +52,12 @@ func main() {
 		if err != nil {
 			log.Fatal().Err(err).Str("name", chosen).Msg("Error conecting to DNS connector")
 		}
-		p.SetConnector(c)
+		p = state.NewParser(*gatewayAddress, c)
 	}
 
+	// Start the state parser
+	err := p.Start()
+	if err != nil {
+		log.Error().Err(err).Msg("Error parsing state")
+	}
 }
