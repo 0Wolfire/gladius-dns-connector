@@ -44,13 +44,16 @@ func main() {
 	if *logPretty {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
-	//
-	if chosen != "list" {
-		err := connectors.GetConnector(chosen).Connect()
+
+	// Get the chosen connector and start it
+	if connectors.Exists(chosen) {
+		c := connectors.GetConnector(chosen)
+
+		err := c.Connect()
 		if err != nil {
 			log.Fatal().Err(err).Str("name", chosen).Msg("Error conecting to DNS connector")
 		}
-		p.SetConnector(connectors.GetConnector(chosen))
+		p.SetConnector(c)
 	}
 
 }
