@@ -28,9 +28,6 @@ func init() {
 	RegisterConnector("digitalocean", &DigitalOceanDNSConnector{})
 }
 
-// Assert that we meet the interface at compile time
-var _ Connector = (*DigitalOceanDNSConnector)(nil)
-
 // Setup is used to setup the command line details
 func (do *DigitalOceanDNSConnector) Setup(app *kingpin.CmdClause) {
 	app.Flag("api_key", "The DigitalOcean API Key [Env: DO_API_KEY]").Envar("DO_API_KEY").Required().StringVar(&do.token)
