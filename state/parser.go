@@ -1,10 +1,13 @@
 package state
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/gladiusio/gladius-dns-connector/connectors"
 	"github.com/rs/zerolog/log"
 )
@@ -44,5 +47,14 @@ func (p *Parser) Start() error {
 }
 
 func (p *Parser) processResponse(resp *http.Response) error {
-	return nil
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		fmt.Printf("Key: '%s'\n Value: '%s'\n Type: %s\n", string(key), string(value), dataType)
+		return nil
+	}, "response", "node_data_map")
+
+	return err
 }

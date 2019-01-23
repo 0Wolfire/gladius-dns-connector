@@ -3,6 +3,7 @@ module github.com/gladiusio/gladius-dns-connector
 require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
+	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23
 	github.com/digitalocean/godo v1.7.3
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/rs/zerolog v1.11.0
