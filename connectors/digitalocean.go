@@ -1,8 +1,8 @@
 package connectors
 
 import (
-	"errors"
 	"net"
+	"strings"
 
 	"context"
 
@@ -20,7 +20,7 @@ type DigitalOceanDNSConnector struct {
 	domain    string
 	cdnDomain string
 	token     string
-	idMap     map[string]int
+	recordMap map[string]godo.DomainRecord
 }
 
 // Register this connector in the list
@@ -80,60 +80,62 @@ func (do *DigitalOceanDNSConnector) Connect() error {
 		opt.Page = page + 1
 	}
 
-	// Populate our id map for updates
-	do.idMap = make(map[string]int)
+	// Populate our record map for updates
+	do.recordMap = make(map[string]godo.DomainRecord)
 	for _, r := range list {
-		do.idMap[r.Name] = r.ID
+		if s := strings.Split(r.Name, "."); strings.Contains(r.Name, do.cdnDomain) && len(s) > 1 && r.Type == "A" {
+			addr := s[0]
+			do.recordMap[addr] = r
+		}
 	}
 
-	log.Debug().Interface("records_map", do.idMap).Msg("Loaded record IDs")
+	log.Debug().Interface("records_map", do.recordMap).Msg("Loaded record IDs")
 
 	return nil
 }
 
-// AddNode creates a new record for that node on the DO DNS API
-func (do *DigitalOceanDNSConnector) AddNode(address string, ip net.IP, ttl int) error {
-	recordAdd := &godo.DomainRecordEditRequest{
-		Type: "A",
-		Data: ip.String(),
-		Name: do.makeName(address),
-	}
-	ctx := context.TODO()
-	r, _, err := do.client.Domains.CreateRecord(ctx, do.domain, recordAdd)
+// UpdateState takes the current state of the network and creates records from it
+func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
+	for addr := range s {
+		// Create the request for this node
+		record := &godo.DomainRecordEditRequest{
+			Type: "A",
+			Data: s[addr].String(),
+			Name: do.makeName(addr),
+		}
 
-	// Update our record map
-	do.idMap[r.Name] = r.ID
-	return err
-}
+		// If it exists on DO update it, if not create it.
+		if r, exists := do.recordMap[addr]; exists {
+			ctx := context.TODO()
+			r, _, err := do.client.Domains.EditRecord(ctx, do.domain, r.ID, record)
+			if err != nil {
+				log.Error().Str("address", addr).Str("record", do.makeName(addr)).Msg("Error editing record")
+				continue
+			}
+			do.recordMap[addr] = *r
+		} else {
+			ctx := context.TODO()
+			r, _, err := do.client.Domains.CreateRecord(ctx, do.domain, record)
+			if err != nil {
+				log.Error().Str("address", addr).Str("record", do.makeName(addr)).Msg("Error creating record")
+				continue
 
-// UpdateNode updates a record for that node on the DO DNS API
-func (do *DigitalOceanDNSConnector) UpdateNode(address string, ip net.IP, ttl int) error {
-	recordUpdate := &godo.DomainRecordEditRequest{
-		Type: "A",
-		Data: ip.String(),
-		Name: do.makeName(address),
-	}
-	ctx := context.TODO()
-
-	// Get the correct record ID from the node address
-	id := do.idMap[do.makeName(address)]
-	_, _, err := do.client.Domains.EditRecord(ctx, do.domain, id, recordUpdate)
-
-	return err
-}
-
-// DeleteNode deletes the record for that node on the DO DNS API
-func (do *DigitalOceanDNSConnector) DeleteNode(address string) error {
-	if _, exists := do.idMap[address]; !exists {
-		return errors.New("record does not exist: " + do.makeName(address))
+			}
+			do.recordMap[addr] = *r
+		}
 	}
 
-	_, err := do.client.Domains.DeleteRecord(context.TODO(), do.domain, do.idMap[address])
-	return err
+	return nil
 }
 
 func (do *DigitalOceanDNSConnector) makeName(address string) string {
 	return address + "." + do.cdnDomain
+}
+
+// AllNodes gets all current records on DO's DNS and returns a map of the address
+// to the IP
+func (do *DigitalOceanDNSConnector) AllNodes() (map[string]net.IP, error) {
+	return nil, nil
 }
 
 // TokenSource is a type to store tokens for Oauth

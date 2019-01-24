@@ -8,9 +8,7 @@ import (
 
 // Connector is an interface for exposing methods to interact with a DNS service
 type Connector interface {
-	AddNode(address string, ip net.IP, ttl int) error
-	UpdateNode(address string, ip net.IP, ttl int) error
-	DeleteNode(address string) error
+	UpdateState(map[string]net.IP) error
 	Setup(*kingpin.CmdClause)
 	Connect() error
 }
