@@ -109,7 +109,7 @@ func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 			ctx := context.TODO()
 			r, _, err := do.client.Domains.EditRecord(ctx, do.domain, r.ID, record)
 			if err != nil {
-				log.Error().Str("address", addr).Str("record", do.makeName(addr)).Msg("Error editing record")
+				log.Error().Str("address", addr).Err(err).Str("record", do.makeName(addr)).Msg("Error editing record")
 				continue
 			}
 			do.recordMap[addr] = *r
@@ -117,9 +117,8 @@ func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 			ctx := context.TODO()
 			r, _, err := do.client.Domains.CreateRecord(ctx, do.domain, record)
 			if err != nil {
-				log.Error().Str("address", addr).Str("record", do.makeName(addr)).Msg("Error creating record")
+				log.Error().Str("address", addr).Err(err).Str("record", do.makeName(addr)).Msg("Error creating record")
 				continue
-
 			}
 			do.recordMap[addr] = *r
 		}
