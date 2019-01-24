@@ -106,13 +106,16 @@ func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 
 		// If it exists on DO update it, if not create it.
 		if r, exists := do.recordMap[addr]; exists {
-			ctx := context.TODO()
-			r, _, err := do.client.Domains.EditRecord(ctx, do.domain, r.ID, record)
-			if err != nil {
-				log.Error().Str("address", addr).Err(err).Str("record", do.makeName(addr)).Msg("Error editing record")
-				continue
+			// If it's the same don't update the record
+			if r.Data != record.Data {
+				ctx := context.TODO()
+				r, _, err := do.client.Domains.EditRecord(ctx, do.domain, r.ID, record)
+				if err != nil {
+					log.Error().Str("address", addr).Err(err).Str("record", do.makeName(addr)).Msg("Error editing record")
+					continue
+				}
+				do.recordMap[addr] = *r
 			}
-			do.recordMap[addr] = *r
 		} else {
 			ctx := context.TODO()
 			r, _, err := do.client.Domains.CreateRecord(ctx, do.domain, record)
