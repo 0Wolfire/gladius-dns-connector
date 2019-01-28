@@ -1,7 +1,6 @@
 package connectors
 
 import (
-	"fmt"
 	"net"
 	"strings"
 
@@ -21,7 +20,7 @@ type DigitalOceanDNSConnector struct {
 	domain    string
 	cdnDomain string
 	token     string
-	recordMap map[string]godo.DomainRecord
+	recordMap map[string]*godo.DomainRecord
 }
 
 // Register this connector in the list
@@ -82,11 +81,11 @@ func (do *DigitalOceanDNSConnector) Connect() error {
 	}
 
 	// Populate our record map for updates
-	do.recordMap = make(map[string]godo.DomainRecord)
+	do.recordMap = make(map[string]*godo.DomainRecord)
 	for _, r := range list {
 		if s := strings.Split(r.Name, "."); strings.Contains(r.Name, do.cdnDomain) && len(s) > 1 && r.Type == "A" {
 			addr := s[0]
-			do.recordMap[addr] = r
+			do.recordMap[addr] = &r
 		}
 	}
 
@@ -112,13 +111,17 @@ func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 		if r, exists := do.recordMap[addrLower]; exists {
 			// If it's the same don't update the record
 			if r.Data != record.Data {
-				updatedRecord, _, err := do.client.Domains.EditRecord(context.TODO(), do.domain, r.ID, record)
+				// Change back to updatedRecord when below is fixed
+				_, _, err := do.client.Domains.EditRecord(context.TODO(), do.domain, r.ID, record)
 				if err != nil {
 					log.Error().Str("address", addrLower).Err(err).Str("record", do.makeName(addrLower)).Msg("Error editing record")
 					continue
 				}
-				fmt.Println(*updatedRecord)
-				do.recordMap[addrLower] = *updatedRecord
+
+				// Uncomment when DO fixes their thing (https://github.com/digitalocean/godo/issues/198)
+				//do.recordMap[addrLower] = updatedRecord
+				// Fix for now:
+				do.recordMap[addrLower].Data = record.Data
 			}
 		} else {
 			log.Debug().Interface("record", do.recordMap[addrLower]).Str("address", addrLower).Msg("Creating new record")
@@ -128,7 +131,7 @@ func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 				log.Error().Str("address", addrLower).Err(err).Str("record", do.makeName(addrLower)).Msg("Error creating record")
 				continue
 			}
-			do.recordMap[addrLower] = *r
+			do.recordMap[addrLower] = r
 		}
 	}
 
