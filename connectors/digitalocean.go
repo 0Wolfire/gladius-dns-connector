@@ -1,6 +1,7 @@
 package connectors
 
 import (
+	"fmt"
 	"net"
 	"strings"
 
@@ -31,7 +32,7 @@ func init() {
 // Setup is used to setup the command line details
 func (do *DigitalOceanDNSConnector) Setup(app *kingpin.CmdClause) {
 	app.Flag("api_key", "The DigitalOcean API Key [Env: DO_API_KEY]").Envar("DO_API_KEY").Required().StringVar(&do.token)
-	app.Flag("domain", "The domain for on DigitalOcean DNS [Env: DO_DOMAIN]").PlaceHolder("yourepool.com").Envar("DO_DOMAIN").Required().StringVar(&do.domain)
+	app.Flag("domain", "The domain for on DigitalOcean DNS [Env: DO_DOMAIN]").PlaceHolder("yourpool.com").Envar("DO_DOMAIN").Required().StringVar(&do.domain)
 	app.Flag("cdn_subdomain", "The cdn subdomain for nodes [Env: DO_CDN_SUBDOMAIN]").Default("cdn").Envar("DO_CDN_SUBDOMAIN").StringVar(&do.cdnDomain)
 }
 
@@ -61,7 +62,7 @@ func (do *DigitalOceanDNSConnector) Connect() error {
 			return err
 		}
 
-		// Append the current page's droplets to our list
+		// Append the current page's records to our list
 		for _, d := range records {
 			list = append(list, d)
 		}
@@ -97,33 +98,37 @@ func (do *DigitalOceanDNSConnector) Connect() error {
 // UpdateState takes the current state of the network and creates records from it
 func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 	for addr := range s {
+		// Lower case the string because DO doesn't support cases in A records apparently
+		addrLower := strings.ToLower(addr)
+
 		// Create the request for this node
 		record := &godo.DomainRecordEditRequest{
 			Type: "A",
 			Data: s[addr].String(),
-			Name: do.makeName(addr),
+			Name: do.makeName(addrLower),
 		}
 
 		// If it exists on DO update it, if not create it.
-		if r, exists := do.recordMap[addr]; exists {
+		if r, exists := do.recordMap[addrLower]; exists {
 			// If it's the same don't update the record
 			if r.Data != record.Data {
-				ctx := context.TODO()
-				r, _, err := do.client.Domains.EditRecord(ctx, do.domain, r.ID, record)
+				updatedRecord, _, err := do.client.Domains.EditRecord(context.TODO(), do.domain, r.ID, record)
 				if err != nil {
-					log.Error().Str("address", addr).Err(err).Str("record", do.makeName(addr)).Msg("Error editing record")
+					log.Error().Str("address", addrLower).Err(err).Str("record", do.makeName(addrLower)).Msg("Error editing record")
 					continue
 				}
-				do.recordMap[addr] = *r
+				fmt.Println(*updatedRecord)
+				do.recordMap[addrLower] = *updatedRecord
 			}
 		} else {
+			log.Debug().Interface("record", do.recordMap[addrLower]).Str("address", addrLower).Msg("Creating new record")
 			ctx := context.TODO()
 			r, _, err := do.client.Domains.CreateRecord(ctx, do.domain, record)
 			if err != nil {
-				log.Error().Str("address", addr).Err(err).Str("record", do.makeName(addr)).Msg("Error creating record")
+				log.Error().Str("address", addrLower).Err(err).Str("record", do.makeName(addrLower)).Msg("Error creating record")
 				continue
 			}
-			do.recordMap[addr] = *r
+			do.recordMap[addrLower] = *r
 		}
 	}
 
