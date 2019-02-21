@@ -111,17 +111,13 @@ func (do *DigitalOceanDNSConnector) UpdateState(s map[string]net.IP) error {
 		if r, exists := do.recordMap[addrLower]; exists {
 			// If it's the same don't update the record
 			if r.Data != record.Data {
-				// Change back to updatedRecord when below is fixed
-				_, _, err := do.client.Domains.EditRecord(context.TODO(), do.domain, r.ID, record)
+				updatedRecord, _, err := do.client.Domains.EditRecord(context.TODO(), do.domain, r.ID, record)
 				if err != nil {
 					log.Error().Str("address", addrLower).Err(err).Str("record", do.makeName(addrLower)).Msg("Error editing record")
 					continue
 				}
 
-				// Uncomment when DO fixes their thing (https://github.com/digitalocean/godo/issues/198)
-				//do.recordMap[addrLower] = updatedRecord
-				// Fix for now:
-				do.recordMap[addrLower].Data = record.Data
+				do.recordMap[addrLower] = updatedRecord
 			}
 		} else {
 			log.Debug().Interface("record", do.recordMap[addrLower]).Str("address", addrLower).Msg("Creating new record")

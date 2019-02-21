@@ -1,0 +1,20 @@
+version: '3.3'
+
+services:
+  mysql:
+    environment: 
+      MYSQL_DATABASE: powerdns
+      MYSQL_ROOT_PASSWORD: powerdns
+    image: mariadb
+    restart: always
+    volumes:
+     - ${PWD}/mariadb:/var/lib/mysql
+
+  powerdns:
+    image: pschiffe/pdns-mysql
+    environment: 
+       PDNS_gmysql_password: "powerdns"
+       PDNS_webserver_address: "0.0.0.0"
+       PDNS_api_key: "secret" 
+       PDNS_webserver_port: 8081 
+       PDNS_webserver: "yes" 
