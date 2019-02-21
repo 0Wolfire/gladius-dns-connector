@@ -12,9 +12,11 @@ services:
 
   powerdns:
     image: pschiffe/pdns-mysql
+    ports:
+      - "8081:8081"
     environment: 
+       PDNS_webserver_allow_from: "0.0.0.0/0,::/0"
        PDNS_gmysql_password: "powerdns"
        PDNS_webserver_address: "0.0.0.0"
        PDNS_api_key: "secret" 
-       PDNS_webserver_port: 8081 
-       PDNS_webserver: "yes" 
+       PDNS_api: "yes" 
