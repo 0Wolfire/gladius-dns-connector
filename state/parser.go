@@ -1,15 +1,15 @@
 package state
 
 import (
-	"fmt"
-	"github.com/buger/jsonparser"
-	"github.com/gladiusio/gladius-dns-connector/connectors"
-	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/buger/jsonparser"
+	"github.com/gladiusio/gladius-dns-connector/connectors"
+	"github.com/rs/zerolog/log"
 )
 
 // Parser processes the JSON state and exposes methods to view it
@@ -53,8 +53,6 @@ func (p *Parser) processResponse(resp *http.Response) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(string(body))
 
 	state := make(map[string]net.IP)
 	err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
