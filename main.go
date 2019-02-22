@@ -54,6 +54,8 @@ func main() {
 			log.Fatal().Err(err).Str("name", chosen).Msg("Error conecting to DNS connector")
 		}
 		p = state.NewParser(*gatewayAddress, *tickRate, c)
+	} else {
+		return
 	}
 
 	// Start the state parser
