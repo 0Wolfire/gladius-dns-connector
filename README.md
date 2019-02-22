@@ -5,41 +5,54 @@ Maps Gladius network state to DNS records
 
 ## General usage
 
+#### Locally
 `gladns [<flags>] <command> [<flags> ...]`
 
+#### In Docker
+`docker run -d gladiusio/dns-connector:latest gladns [<flags>] <command> [<flags> ...]`
+
 ### Available commands
-```
-Commands:
-  help [<command>...]
-    Show help.
 
-  list
-    List available connectors
-
-  digitalocean --api_key=API_KEY --domain=yourpool.com [<flags>]
-    Confgiure DNS with the digitalocean connector
-
-```
+| Command      | Description                        | Example                                                                                  |
+|:-------------|:-----------------------------------|:-----------------------------------------------------------------------------------------|
+| help         | Show help.                         | `gladns help`                                                                            |
+| list         | List all available connectors      | `gladsn list`                                                                            |
+| digitalocean | Use the DigitalOcean DNS connector | `gladns digitalocean --api_key="replaceme" --domain"yourpool.com" --cdn_subdomain="cdn"` |
+| powerdns     | Use the PowerDNS connector         | `gladns powerdns`                                                                        |
 
 ### Available global flags
-```
-Flags:
-  --help          Show context-sensitive help (also try --help-long and --help-man).
-  --tick_rate=5s  How often to query the state and update DNS records
-  --log_pretty    Whether or not to use pretty output or JSON
-  --gateway_address=http://localhost:3001  
-                  The base address to connect to for the gladius network gateway
+| Flag              | Description                                                    | Example                                          |
+|:------------------|:---------------------------------------------------------------|:-------------------------------------------------|
+| --help            | Shows the help menu                                            | `gladns --help`                                  |
+| --tick_rate       | How often we query the state and push updates to DNS service   | `gladns --tickrate=5s`                           |
+| --log_pretty      | Enable the pretty logger                                       | `gladns --log_pretty`                            |
+| --gateway_address | The base address to connect to for the gladius network gateway | `gladns --gateway_address=http://localhost:3001` |
 
-```
 
 ## DigitalOcean Connector 
 
+You will need to generate a personal token at [the DigitalOcean token page](https://cloud.digitalocean.com/account/api/tokens) 
+
 ### Available flags
-```
-  --api_key=API_KEY       The DigitalOcean API Key [Env: DO_API_KEY]
-  --domain=yourepool.com  The domain for on DigitalOcean DNS [Env: DO_DOMAIN]
-  --cdn_subdomain="cdn"   The cdn subdomain for nodes [Env: DO_CDN_SUBDOMAIN]
-```
+| Flag            | Description                                         | Example                                       |
+|:----------------|:----------------------------------------------------|:----------------------------------------------|
+| --api_key       | The DigitalOcean API Key [Env: DO_API_KEY]          | `gladns digitalocean --api_key="mykey"`       |
+| --domain        | The domain for on DigitalOcean DNS [Env: DO_DOMAIN] | `gladns digitalocean --domain="yourpool.com"` |
+| --cdn_subdomain | The CDN subdomain for nodes [Env: DO_CDN_SUBDOMAIN] | `gladns digitalocean --cdn_subdomain="cdn"`   |
+
+## PowerDNS Connector 
+Connects to an instance of PowerDNS Authoritative, you can run `docker-compose up` to run a test configuration of PowerDNS. **Note:** port 53 is not exposed to the host by default, as lots of machines already bind to that.
+
+### Available flags
+| Flag            | Description                                              | Example                                             |
+|:----------------|:---------------------------------------------------------|:----------------------------------------------------|
+| --api_key       | The PowerDNS API Key if needed [Env: PDNS_API_KEY]       | `gladns powerdns --api_key="secretkey"`             |
+| --domain        | The base domain for PowerDNS [Env: PDNS_DOMAIN]          | `gladns powerdns --domain="yourpool.com"`           |
+| --cdn_subdomain | The cdn subdomain for nodes [Env: PDNS_CDN_SUBDOMAIN]    | `gladns powerdns --cdn_subdomain="cdn"`             |
+| --server        | The PowerDNS server to use in the URL [Env: PDNS_SERVER] | `gladns powerdns --server="localhost"`              |
+| --baseurl       | The API URL for PowerDNS [Env: PDNS_URL]                 | `gladns powerdns --baseurl="http://localhost:8081"` |
+| --print_records | Prints existing records at startup                       | `gladns powerdns --print_records`                   |
+
 
 # Writing your own connector
 
