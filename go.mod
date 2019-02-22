@@ -9,9 +9,8 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/rs/zerolog v1.11.0
 	github.com/stretchr/testify v1.3.0 // indirect
-	github.com/tent/http-link-go v0.0.0-20130702225549-ac974c61c2f9 // indirect
 	github.com/waynz0r/go-powerdns v1.1.1
-	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
+	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd // indirect
 	golang.org/x/oauth2 v0.0.0-20190115181402-5dab4167f31c
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

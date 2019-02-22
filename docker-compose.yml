@@ -1,3 +1,5 @@
+# Runs a powerdns authoritative server 
+
 version: '3.3'
 
 services:
@@ -14,6 +16,8 @@ services:
     image: pschiffe/pdns-mysql
     ports:
       - "8081:8081"
+      # Uncomment below to forward to your machine (you will likely have to disable whatever DNS is running)
+      # - "53:53"
     environment: 
        PDNS_webserver_allow_from: "0.0.0.0/0,::/0"
        PDNS_gmysql_password: "powerdns"
