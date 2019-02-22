@@ -15,7 +15,7 @@ Maps Gladius network state to DNS records
 
 | Command      | Description                        | Example                                                                                  |
 |:-------------|:-----------------------------------|:-----------------------------------------------------------------------------------------|
-| help         | Show help.                         | `gladns help`                                                                            |
+| help         | Show help                          | `gladns help`                                                                            |
 | list         | List all available connectors      | `gladsn list`                                                                            |
 | digitalocean | Use the DigitalOcean DNS connector | `gladns digitalocean --api_key="replaceme" --domain"yourpool.com" --cdn_subdomain="cdn"` |
 | powerdns     | Use the PowerDNS connector         | `gladns powerdns`                                                                        |
