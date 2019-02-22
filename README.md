@@ -1,5 +1,6 @@
 # Gladius DNS Connector
-Maps Gladius network state to DNS records
+Translates Gladius content node state into DNS records so they can serve over HTTPS. Gives each content node
+an `A` record like: `[node_eth_address].cdn.yourpool.com`.
 
 # Running the connector
 
