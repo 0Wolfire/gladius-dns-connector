@@ -33,11 +33,11 @@ func init() {
 
 // Setup is used to setup the command line details
 func (p *PowerDNSConnector) Setup(app *kingpin.CmdClause) {
-	app.Flag("api_key", "The PowerDNS API Key if needed[Env: PDNS_API_KEY]").Envar("PDNS_API_KEY").PlaceHolder("secretkey").Required().StringVar(&p.apiKey)
+	app.Flag("api_key", "The PowerDNS API Key if needed [Env: PDNS_API_KEY]").Envar("PDNS_API_KEY").PlaceHolder("secretkey").Required().StringVar(&p.apiKey)
 	app.Flag("domain", "The base domain for PowerDNS [Env: PDNS_DOMAIN]").PlaceHolder("yourpool.com").Envar("PDNS_DOMAIN").Required().StringVar(&p.domain)
-	app.Flag("server", "The PowerDNS server to use in the URL [Env: PDN_SERVER]").Default("localhost").Envar("PDN_SERVER").StringVar(&p.server)
-	app.Flag("baseurl", "The API URL for PowerDNS [Env: PDN_URL]").Default("http://localhost:8081").Envar("PDN_URL").StringVar(&p.baseURL)
-	app.Flag("cdn_subdomain", "The cdn subdomain for nodes [Env: PDN_CDN_SUBDOMAIN]").Default("cdn").Envar("PDN_CDN_SUBDOMAIN").StringVar(&p.cdnDomain)
+	app.Flag("server", "The PowerDNS server to use in the URL [Env: PDNS_SERVER]").Default("localhost").Envar("PDNS_SERVER").StringVar(&p.server)
+	app.Flag("baseurl", "The API URL for PowerDNS [Env: PDNS_URL]").Default("http://localhost:8081").Envar("PDNS_URL").StringVar(&p.baseURL)
+	app.Flag("cdn_subdomain", "The cdn subdomain for nodes [Env: PDNS_CDN_SUBDOMAIN]").Default("cdn").Envar("PDNS_CDN_SUBDOMAIN").StringVar(&p.cdnDomain)
 	app.Flag("print_records", "Prints records at startup").Default("false").BoolVar(&p.printRecords)
 }
 
