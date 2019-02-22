@@ -13,12 +13,12 @@ Maps Gladius network state to DNS records
 
 ### Available commands
 
-| Command      | Description                        | Example                                                                                  |
-|:-------------|:-----------------------------------|:-----------------------------------------------------------------------------------------|
-| help         | Show help                          | `gladns help`                                                                            |
-| list         | List all available connectors      | `gladsn list`                                                                            |
-| digitalocean | Use the DigitalOcean DNS connector | `gladns digitalocean --api_key="replaceme" --domain"yourpool.com" --cdn_subdomain="cdn"` |
-| powerdns     | Use the PowerDNS connector         | `gladns powerdns`                                                                        |
+| Command      | Description                        | Example                         |
+|:-------------|:-----------------------------------|:--------------------------------|
+| help         | Show help                          | `gladns help`                   |
+| list         | List all available connectors      | `gladsn list`                   |
+| digitalocean | Use the DigitalOcean DNS connector | `gladns digitalocean [<flags>]` |
+| powerdns     | Use the PowerDNS connector         | `gladns powerdns  [<flags>]`    |
 
 ### Available global flags
 | Flag              | Description                                                    | Example                                          |
@@ -42,6 +42,13 @@ You will need to generate a personal token at [the DigitalOcean token page](http
 
 ## PowerDNS Connector 
 Connects to an instance of PowerDNS Authoritative, you can run `docker-compose up` to run a test configuration of PowerDNS. **Note:** port 53 is not exposed to the host by default, as lots of machines already bind to that.
+
+You will also need to create a zonefile for that domain if it does not already exist, you can do that with a curl command:
+```bash
+curl -X POST -d '{"name":"yourpool.com.", "kind": "Master","dnssec":false,"soa-edit":"INCEPTION-INCREMENT","masters": [], "nameservers": []}' \
+  -v -H 'X-API-Key: secret' \
+  http://127.0.0.1:8081/api/v1/servers/localhost/zones
+```
 
 ### Available flags
 | Flag            | Description                                              | Example                                             |
